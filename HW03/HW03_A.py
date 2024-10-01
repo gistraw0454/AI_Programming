@@ -20,7 +20,8 @@ def inputName():    # 이름 입력받고 return
 
 # insert the name into set
 def insertSet(mySet, name):
-    if mySet.intersection({name}):   # mySet과 name의 교집합이 있으면 "이미 있다" 출력, 없으면 "추가" 출력.
+    # mySet과 name의 교집합이 있으면 "이미 있다" 출력, 없으면 "추가" 출력.
+    if name in mySet:   # if mySet.intersection({name}):   
         print("{} is already in Names.txt".format(name))
     else:
         print("{} is added in Names.txt".format(name))
