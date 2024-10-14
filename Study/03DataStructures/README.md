@@ -68,4 +68,36 @@ if name.find('war') != -1: print(true)  # war을 포함하고있음 없으면 -1
 ```
 
 
-## Set
+## Set {}
+- 수학적 집합과 유사
+- 순서X, 중복X, 인덱싱X
+    - 순서가없어도 `sorted(set명)`으로 순서있게 둘 수는 있다.
+- list나 다른 set이 들어갈 수 없음
+
+![alt text](image-1.png)
+
+## List, Tuple, Set 와리가리
+```py
+words = ['asdwa','asdwa','wink','wink']
+tuple(words)    # ('asdwa','asdwa','wink','wink')
+set(words)  # {'asdwa','wink'}
+list(words) # ['asdwa','asdwa','wink','wink']
+```
+
+## Dictionary {key:value,}
+- `d = {key1:val1,key2:val2,..}`
+    - d[key1] 로 접근가능
+- 키는 고유한 불변 객체(예: 문자열, 숫자 또는 튜플)여야 합니다
+
+```py
+list1 = [["one",1],["two",2]]
+dict(list1) # {'one':1,'two':2}
+
+list2 = [("one",1),("two",2)]
+dict(list2) # {'one':1,'two':2}
+```
+
+for name,address in list(addr.items()): # 튜플을 리턴하고 그걸 list화 시킨다.
+
+![alt text](image-2.png)
+![alt text](image-3.png)
