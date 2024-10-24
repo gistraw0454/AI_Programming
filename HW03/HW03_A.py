@@ -36,8 +36,6 @@ def writeToFile(modifiedSet):
         File.write(name+'\n')
     File.close()
 
-
-
 def main():  
     mySet = readSetFromFile() 
     name = inputName() 

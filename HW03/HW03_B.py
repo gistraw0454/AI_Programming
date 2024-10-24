@@ -9,7 +9,6 @@ def populateDictionary():
     File.close()    # 닫기
     return newDic
         
-
 # Input units and length from the terminal.
 def getInput(): 
     orig = input("Unit to convert from: ")
