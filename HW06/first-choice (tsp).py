@@ -1,19 +1,20 @@
-from problem import Numeric
-import random
+from problem import Tsp
 
-LIMIT_STUCK = 100   # limit stuck 전역변수 만들기
+LIMIT_STUCK = 100 
+
 
 def main():
-    p = Numeric()   # 객체 생성
+    p = Tsp()   # 객체 생성
     p.setVariables()    # 파일 읽어와서 초기화하기
-
     # Call the search algorithm
-    firstChoice(p)  # first-choice 함수 호출
+    firstChoice(p)
     # Show the problem and algorithm settings
     p.describe()        # 출력 
-    displaySetting(p)   
+    displaySetting()   
     
-    p.report()  # 결과 출력 Problem 부모 메서드로 부터 받아온다.
+    # Report results
+    p.report() 
+    
 
 def firstChoice(p): # first-choice 함수 정의
     current = p.randomInit()    # 랜덤한 current 결정
@@ -31,10 +32,9 @@ def firstChoice(p): # first-choice 함수 정의
             i += 1
     p.storeResult(current, valueC)  # 최적의 solution을 저장
 
-def displaySetting(p):
+
+def displaySetting():
     print()
     print("Search algorithm: First-Choice Hill Climbing")
-    print()
-    print("Mutation step size:", p.getDelta())
 
 main()

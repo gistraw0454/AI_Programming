@@ -23,8 +23,6 @@ def createProblem(): ### TODO
     domain = [varNames,low,up]
     return expression, domain
 
-
-
 def randomInit(p): ### TODO
     domain = p[1]   # domain: [varNams, low, up]
     low, up = domain[1], domain[2]
@@ -75,6 +73,15 @@ def displayResult(solution, minimum):
     print("Minimum value: {0:,.3f}".format(minimum))
     print()
     print("Total number of evaluations: {0:,}".format(NumEval))
+
+def mutants(current, p): ### TODO
+    neighbors = []
+    for i in range(len(current)):   # For each variable
+        mutant = mutant(current, i, DELTA, p)
+        neighbors.append(mutant)
+        mutant = mutate(current, i, -DELTA,p)
+        neighbors.append(mutant)
+    return neighbors    # neighbors 을 다 찾는다. 각각의 변수에대해 +-DELTA 해준다.
 
 def coordinate(solution):
     c = [round(value, 3) for value in solution]

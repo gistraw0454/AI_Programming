@@ -1,24 +1,23 @@
 from problem import Numeric
 
-
 def main():
     
     p = Numeric()   
-    p.setVariables()
+    p.setVariables()    # 객체 생성 및 파일 읽어 초기화하기
     
-    steepestAscent(p)
+    steepestAscent(p)   # steepsetAscent 함수 호출
     
-    p.describe()
+    p.describe()    # 알고리즘 셋팅 출력하기
     displaySetting(p)
     
-    p.report()
+    p.report()  # 결과 출력
 
-def steepestAscent(p):
+def steepestAscent(p):  # steepestAscent 함수 정의
     current = p.randomInit() # 'current' is a list of values
     valueC = p.evaluate(current)
     while True:
         neighbors = p.mutants(current)
-        successor, valueS = bestOf(neighbors)
+        successor, valueS = bestOf(neighbors,p)
         if valueS >= valueC:
             break
         else:
