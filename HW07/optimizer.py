@@ -28,7 +28,7 @@ class FirstChoice(HillClimbing):
     def displaySetting(self):
         print()
         print("Search algorithm: First-Choice Hill Climbing")
-        super().displaySetting()
+        super().displaySetting()    # HillClimbing.displaySetting(self) 도 가능
         print("Max evaluations with no improvement: {0:,} iterations".format(self._limitStuck))
     
     def run(self,p):

@@ -11,7 +11,7 @@ class Problem(Setup):
         self._value = 0
         self._numEval = 0
 
-    def setVariables(self): # interface¸¸ Á¦°ø
+    def setVariables(self): # interfaceë§Œ ì œê³µ
         pass
     
     def randomInit(self):
@@ -41,7 +41,7 @@ class Problem(Setup):
 class Numeric(Problem):
     def __init__(self):
         Problem.__init__(self)
-        # super().__init__(self) µÑ´Ù °¡´É
+        # super().__init__(self) ë‘˜ë‹¤ ê°€ëŠ¥
         self._expression = ''
         self._domain = []     # domain as a list
 
@@ -62,46 +62,46 @@ class Numeric(Problem):
         infile.close()
         self._domain = [varNames,low,up]
 
-    def getDelta(self): # µ¨Å¸ ¸®ÅÏ
+    def getDelta(self): # ë¸íƒ€ ë¦¬í„´
         return self._delta
     
-    def getAlpha(self): # ¾ËÆÄ ¸®ÅÏ
+    def getAlpha(self): # ì•ŒíŒŒ ë¦¬í„´
         return self._alpha
 
-    def getDx(self):    # dx ¸®ÅÏ
+    def getDx(self):    # dx ë¦¬í„´
         return self._dx
 
-    def takeStep(self, x, v):   # ±â¿ï±âÀÇ À½ÀÇ ¹æÇâÀ¸·Î ÀÌµ¿
-        grad = self.gradient(x, v)  # ÇöÀç À§Ä¡¿¡¼­ÀÇ ±â¿ï±â °è»ê
-        xCopy = x[:] # º¹»ç
+    def takeStep(self, x, v):   # ê¸°ìš¸ê¸°ì˜ ìŒì˜ ë°©í–¥ìœ¼ë¡œ ì´ë™
+        grad = self.gradient(x, v)  # í˜„ì¬ ìœ„ì¹˜ì—ì„œì˜ ê¸°ìš¸ê¸° ê³„ì‚°
+        xCopy = x[:] # ë³µì‚¬
 
-        for i in range(len(xCopy)): # x±æÀÌ ¸¸Å­ ¹İº¹
-            xCopy[i] -= self._alpha * grad[i]   # ±â¿ï±â À½ÀÇ ¹æÇâÀ¸·Î ÀÌµ¿ 
+        for i in range(len(xCopy)): # xê¸¸ì´ ë§Œí¼ ë°˜ë³µ
+            xCopy[i] -= self._alpha * grad[i]   # ê¸°ìš¸ê¸° ìŒì˜ ë°©í–¥ìœ¼ë¡œ ì´ë™ 
         
-        if self.isLegal(xCopy):  # ¹üÀ§°¡ Å¸´çÇÑÁö È®ÀÎ ÇÏ±â 
+        if self.isLegal(xCopy):  # ë²”ìœ„ê°€ íƒ€ë‹¹í•œì§€ í™•ì¸ í•˜ê¸° 
             return xCopy
         else:
             return x
 
-    def gradient(self,x,v): # ÇØ´çºÎºĞ¿¡¼­ÀÇ ±â¿ï±â¸¦ ±¸ÇÑ´Ù.
+    def gradient(self,x,v): # í•´ë‹¹ë¶€ë¶„ì—ì„œì˜ ê¸°ìš¸ê¸°ë¥¼ êµ¬í•œë‹¤.
         grad = []
 
         for i in range(len(x)):
-            xCopyH = x[:]   # º¹»ç
-            xCopyH[i] += self._dx # x_¿¡ dx¸¦ ´õÇØÁØ´Ù. !
-            g = (self.evaluate(xCopyH)-v)/self._dx  # ±â¿ï±â °è»ê
-            grad.append(g)  # ±â¿ï±â ¸®½ºÆ®¿¡ Ãß°¡ 
-        return grad # ¸®½ºÆ® ¹İÈ¯
+            xCopyH = x[:]   # ë³µì‚¬
+            xCopyH[i] += self._dx # x_ì— dxë¥¼ ë”í•´ì¤€ë‹¤. !
+            g = (self.evaluate(xCopyH)-v)/self._dx  # ê¸°ìš¸ê¸° ê³„ì‚°
+            grad.append(g)  # ê¸°ìš¸ê¸° ë¦¬ìŠ¤íŠ¸ì— ì¶”ê°€ 
+        return grad # ë¦¬ìŠ¤íŠ¸ ë°˜í™˜
 
-    def isLegal(self, x):   # low, up ÃßÃâ
+    def isLegal(self, x):   # low, up ì¶”ì¶œ
         domain = self._domain
         low = domain[1]
         up = domain[2]
         flag = True
 
-        for i in range(len(low)): # x±æÀÌ ¸¸Å­ µ¹¸é¼­ ¹üÀ§³»¿¡ ÀÖ´ÂÁö È®ÀÎ
+        for i in range(len(low)): # xê¸¸ì´ ë§Œí¼ ëŒë©´ì„œ ë²”ìœ„ë‚´ì— ìˆëŠ”ì§€ í™•ì¸
             if x[i] < low[i] or x[i] > up[i]:
-                flag = False    # ¹üÀ§ ¹ş¾î³ª¸é?
+                flag = False    # ë²”ìœ„ ë²—ì–´ë‚˜ë©´?
                 break
         return flag
 
@@ -165,13 +165,13 @@ class Numeric(Problem):
             neighbors.append(mutant)
         return neighbors
     
-    def randomMutant(self,current): ### TODO  # °øÅëÀÎ ÇÔ¼ö´Â ¾Æ´Ô.
+    def randomMutant(self,current): ### TODO  # ê³µí†µì¸ í•¨ìˆ˜ëŠ” ì•„ë‹˜.
         i = random.randint(0,len(current)-1)
-        if random.uniform(0,1)>0.5: # 0.5 È®·ü·Î +,- °áÁ¤
+        if random.uniform(0,1)>0.5: # 0.5 í™•ë¥ ë¡œ +,- ê²°ì •
             d = self.getDelta()    
         else:
             d = -self.getDelta()
-        return self.mutate(current, i, d)  # +,- ¹æÇâÀ¸·Î mutate ½ÃÅ´. (°´Ã¼ ¸Ş¼­µå È£Ãâ)
+        return self.mutate(current, i, d)  # +,- ë°©í–¥ìœ¼ë¡œ mutate ì‹œí‚´. (ê°ì²´ ë©”ì„œë“œ í˜¸ì¶œ)
 
 class Tsp(Problem):
     def __init__(self):
@@ -181,19 +181,19 @@ class Tsp(Problem):
         self._distanceTable = []
 
     ### Tsp methods
-    # tspÀÇ createProblemÀ» setVariables ¸Ş¼Òµå·Î º¯°æ
+    # tspì˜ createProblemì„ setVariables ë©”ì†Œë“œë¡œ ë³€ê²½
     def setVariables(self):
         fileName = input("Enter the file name of a TSP: ")
-        infile = open(fileName, 'r')  # ÆÄÀÏ °æ·Î ÀÔ·Â¹Ş±â
+        infile = open(fileName, 'r')  # íŒŒì¼ ê²½ë¡œ ì…ë ¥ë°›ê¸°
         self._numCities = int(infile.readline())
         locations = []
         line = infile.readline()  # The rest of the lines are locations
         while line != '':
-            locations.append(eval(line))  # Æ©ÇÃ ¸¸µé°í Ãß°¡ÇÏ°í ÀĞ°í ´İ±â
+            locations.append(eval(line))  # íŠœí”Œ ë§Œë“¤ê³  ì¶”ê°€í•˜ê³  ì½ê³  ë‹«ê¸°
             line = infile.readline()
         infile.close()
-        self._locations = locations # ÀĞÀº locationsÀ» self._locations¿¡ ³Ö±â
-        self._distanceTable = self.calcDistanceTable()  # table ´ë½Å self._distanceTable·Î µÎ±â
+        self._locations = locations # ì½ì€ locationsì„ self._locationsì— ë„£ê¸°
+        self._distanceTable = self.calcDistanceTable()  # table ëŒ€ì‹  self._distanceTableë¡œ ë‘ê¸°
 
 
     def calcDistanceTable(self):
@@ -208,17 +208,17 @@ class Tsp(Problem):
         return table
 
     def randomInit(self):
-        n =self._numCities # p[0]Àº numcitiest
+        n =self._numCities # p[0]ì€ numcitiest
         init = list(range(n))
         random.shuffle(init)
         return init
 
     def evaluate(self, current):
-        self._numEval += 1  # Problem¿¡ÀÖ´Â _numEvalÀ» ++ ÇØÁÖ¸ç ¾ó¸¶³ª ¸¹ÀÌ evalution ÇÏ´ÂÁö ÃßÃ´ÇØÁØ´Ù.
+        self._numEval += 1  # Problemì—ìˆëŠ” _numEvalì„ ++ í•´ì£¼ë©° ì–¼ë§ˆë‚˜ ë§ì´ evalution í•˜ëŠ”ì§€ ì¶”ì²™í•´ì¤€ë‹¤.
 
-        n = self._numCities    # p[0] Àº numcities
-        table = self._distanceTable    # p[2] = distance table ÀÓ
-        cost = 0    # 0¿¡¼­ºÎÅÍ for ¹®À» µ¹¸é¼­ n-1¸¸Å­ sum ÁøÇà
+        n = self._numCities    # p[0] ì€ numcities
+        table = self._distanceTable    # p[2] = distance table ì„
+        cost = 0    # 0ì—ì„œë¶€í„° for ë¬¸ì„ ëŒë©´ì„œ n-1ë§Œí¼ sum ì§„í–‰
 
         for i in range(n-1):
             locFrom = current[i]
@@ -242,7 +242,7 @@ class Tsp(Problem):
                 neighbors.append(curCopy)
         return neighbors
 
-    def inversion(self, current, i, j): # ÆÄ¶ó¹ÌÅÍ¸¸ ¹Ù²ãÁØ´Ù.
+    def inversion(self, current, i, j): # íŒŒë¼ë¯¸í„°ë§Œ ë°”ê¿”ì¤€ë‹¤.
         curCopy = current[:]
         while i < j:
             curCopy[i], curCopy[j] = curCopy[j], curCopy[i]
@@ -263,16 +263,16 @@ class Tsp(Problem):
     # describeProblem
     def describe(self):
         print()
-        n = self._numCities # p[0] Àº self._numCities´Ï±î º¯°æÇÏ±â
+        n = self._numCities # p[0] ì€ self._numCitiesë‹ˆê¹Œ ë³€ê²½í•˜ê¸°
         print("Number of cities:", n)
         print("City locations:")
-        locations = self._locations # p[1] Àº self._locations´Ï±î º¯°æÇÏ±â
+        locations = self._locations # p[1] ì€ self._locationsë‹ˆê¹Œ ë³€ê²½í•˜ê¸°
         for i in range(n):
             print("{0:>12}".format(str(locations[i])), end = '')
             if i % 5 == 4:
                 print()
 
-    def tenPerRow(self):   # ±×´ë·Î 
+    def tenPerRow(self):   # ê·¸ëŒ€ë¡œ 
         for i in range(len(self._solution)):
             print("{0:>5}".format(self._solution[i]), end='')
             if i % 10 == 9:
