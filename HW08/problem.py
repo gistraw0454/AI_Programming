@@ -11,9 +11,26 @@ class Problem(Setup):
         self._value = 0
         self._numEval = 0
 
-    def setVariables(self): # interface만 제공
-        pass
+        self._pFileName = ''
+        self._bestSolution = []
+        self._bestMinimum = 0
+        self._avgMinimum = 0
+        self._avgNumEval = 0
+        self._sumOfNumEval = 0
+        self._avgWhen = 0
+
+    def setVariables(self, parameters): 
+        Setup.setVariables(self, parameters)
+        self._pFileName = parameters['pFileName']
     
+    def storeExpResult(self, results):  # 결과값들 저장
+        self._bestSolution = results[0]
+        self._bestMinimum = results[1]
+        self._avgMinimum = results[2]
+        self._avgNumEval = results[3]
+        self._sumOfNumEval = results[4]
+        self._avgWhen = results[5]
+
     def randomInit(self):
         pass
 
@@ -35,7 +52,7 @@ class Problem(Setup):
 
     def report(self):
         print()
-        print("Total number of evaluations: {0:,}".format(self._numEval))
+        print("Total number of evaluations: {0:,}".format(self._sumOfNumEval))
 
     def getSolution(self):
         return self._solution
@@ -54,8 +71,9 @@ class Numeric(Problem):
         self._expression = ''
         self._domain = []     # domain as a list
 
-    def setVariables(self):
-        fileName = input("Enter the file name of a function: ")
+    def setVariables(self,parameters):
+        Problem.setVariables(self,parameters)
+        fileName = self._pFileName
         infile = open(fileName, 'r')
         self._expression = infile.readline()
         varNames = []
@@ -137,10 +155,12 @@ class Numeric(Problem):
             print(" "+varNames[i]+":",(low[i],up[i]))
 
     def report(self):
+        print("Average objective value: {0:,.3f}".format(self._avgMinimum))    # 평균 최소값 출력
+        print("Average number of evalutions: {0:,}".format(int(self._avgNumEval)))  # 평균 최소 평가 횟수 출력
         print()
         print("Solution found:")
         print(self.coordinate())  # Convert list to tuple
-        print("Minimum value: {0:,.3f}".format(self._value))
+        print("Best value: {0:,.3f}".format(self._value))
         Problem.report(self)
 
     def coordinate(self):
@@ -191,8 +211,9 @@ class Tsp(Problem):
 
     ### Tsp methods
     # tsp의 createProblem을 setVariables 메소드로 변경
-    def setVariables(self):
-        fileName = input("Enter the file name of a TSP: ")
+    def setVariables(self,parameters):
+        Problem.setVariables(self,parameters)
+        fileName = self._pFileName
         infile = open(fileName, 'r')  # 파일 경로 입력받기
         self._numCities = int(infile.readline())
         locations = []
@@ -288,8 +309,10 @@ class Tsp(Problem):
                 print()
 
     def report(self):
+        print("Average tour cost: {0:,}".format(round(self._avgMinimum)))  # 평균 여행 비용 출력
+        print("Average number of evalutions: {0:,}".format(int(self._avgNumEval)))  # 평균 평가횟수 출력
         print()
         print("Best order of visits:")
         self.tenPerRow()
-        print("Minimum tour cost: {0:,}".format(round(self._value)))   
+        print("Best tour cost: {0:,}".format(round(self._bestMinimum)))   
         super().report()

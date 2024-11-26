@@ -1,0 +1,26 @@
+pType 입력받음
+
+파일명 입력받음
+
+aType 입력받음
+
+delta 입력받음
+
+2,3 고른경우 (FirstChoice, Stocahstic)
+    limitStuck 입력받음 
+
+4 고른경우 GradientDescent
+    alpha 입력받음
+    dx 입력받음
+
+hill climbing인 경우
+    numRestart 입력받음
+
+metaheuristic인 경우
+    limitEval 입력받음
+
+numExp 입력받음
+
+{ 'pType':0, 'pFileName':'', 'aType':0, 'delta':0,
+                   'limitStuck':0, 'alpha':0, 'dx':0, 'numRestart':0,
+                   'limitEval':0, 'numExp':0 }
