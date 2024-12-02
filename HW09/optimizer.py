@@ -219,6 +219,8 @@ class GradientDescent(HillClimbing):
                 valueC = valueN
         p.storeResult(currentP, valueC)
 
+
+###################### SimulatedAnnealing ################33
 class SimulatedAnnealing(MetaHeuristic):
     def __init__(self):
         MetaHeuristic.__init__(self) 
@@ -227,6 +229,7 @@ class SimulatedAnnealing(MetaHeuristic):
     def displaySetting(self):
         print("Search Algorithm: Simulated Annealing")
         MetaHeuristic.displaySetting(self)
+        print()
         
     
     def run(self, p):
@@ -249,7 +252,7 @@ class SimulatedAnnealing(MetaHeuristic):
             neighbor = p.randomMutant(current)
             valueN = p.evaluate(neighbor)
             i+=1
-            dE = valueN = valueC
+            dE = valueN - valueC
             
             if dE < 0:
                 current = neighbor
@@ -299,8 +302,40 @@ class SimulatedAnnealing(MetaHeuristic):
     def tSchedule(self, t):
         return t * (1 - (1 / 10**4))
 
+    
+    def stochasticBest(self, neighbors, p):
+        # Smaller valuse are better in the following list
+        valuesForMin = [p.evaluate(indiv) for indiv in neighbors]
+        largeValue = max(valuesForMin) + 1
+        valuesForMax = [largeValue - val for val in valuesForMin]
+        # Now, larger values are better
+        total = sum(valuesForMax)
+        randValue = random.uniform(0, total)
+        s = valuesForMax[0]
+        for i in range(len(valuesForMax)):
+            if randValue <= s: # The one with index i is chosen
+                break
+            else:
+                s += valuesForMax[i+1]
+        return neighbors[i], valuesForMin[i]
+
+    def initTemp(self, p): # To set initial acceptance probability to 0.5
+        diffs = []
+        for i in range(self._numSample):
+            c0 = p.randomInit()     # A random point
+            v0 = p.evaluate(c0)     # Its value
+            c1 = p.randomMutant(c0) # A mutant
+            v1 = p.evaluate(c1)     # Its value
+            diffs.append(abs(v1 - v0))
+        dE = sum(diffs) / self._numSample  # Average value difference
+        t = dE / math.log(2)        # exp(–dE/t) = 0.5
+        return t
+
+    def tSchedule(self, t):
+        return t * (1 - (1 / 10**4))
+
 class GA(MetaHeuristic):
-    def __init__(self):
+    def __init__(self): # 스켈레톤 코드 복사 
         MetaHeuristic.__init__(self)
         self._popSize = 0     # Population size
         self._uXp = 0   # Probability of swappping a locus for Xover
@@ -309,16 +344,14 @@ class GA(MetaHeuristic):
         self._mR = 0    # Mutation rate for permutation code
         self._pC = 0    # Probability parameter for Xover
         self._pM = 0    # Probability parameter for mutation
-        self._resolution =0
 
-    def setVariables(self, parameters):
+    def setVariables(self, parameters): # 스켈레톤 코드 복사 
         MetaHeuristic.setVariables(self, parameters)
         self._popSize = parameters['popSize']
         self._uXp = parameters['uXp']
         self._mrF = parameters['mrF']
         self._XR = parameters['XR']
         self._mR = parameters['mR']
-        self._resolution = parameters['resolution']
         if self._pType == 1:
             self._pC = self._uXp
             self._pM = self._mrF
@@ -326,7 +359,7 @@ class GA(MetaHeuristic):
             self._pC = self._XR
             self._pM = self._mR
 
-    def displaySetting(self):
+    def displaySetting(self):   # 스켈레톤 코드 복사 
         print()
         print("Search Algorithm: Genetic Algorithm")
         print()
@@ -334,7 +367,7 @@ class GA(MetaHeuristic):
         print()
         print("Population size:", self._popSize)
         if self._pType == 1:   # Numerical optimization
-            print("Number of bits for binary encoding:", self._resolution)
+            # print("Number of bits for binary encoding:", self._resolution)
             print("Swap probability for uniform crossover:", self._uXp)
             print("Multiplication factor to 1/L for bit-flip mutation:",
                   self._mrF)
@@ -342,65 +375,68 @@ class GA(MetaHeuristic):
             print("Crossover rate:", self._XR)
             print("Mutation rate:", self._mR)
 
+        print()
+        
 
-    def evalAndFindBest(self, pop, p):
-        best = pop[0]
-        p.evalInd(best)
-        bestValue = best[0]
-        for i in range(1, len(pop)):
+
+    def evalAndFindBest(self, pop, p):  
+        best = pop[0]   
+        p.evalInd(best) # 염색체 eval하기
+        bestValue = best[0] # 잘난놈
+        for i in range(1, len(pop)):       # pop len만큼 돌면서 좋은거 찾기
             p.evalInd(pop[i])
             newValue = pop[i][0]
-            if newValue < bestValue:
-                best = pop[i]
+            if newValue < bestValue:    # 더잘난게 있으면 바꿔주기
+                best = pop[i]   
                 bestValue = newValue
-        return best
+        return best # 잘난놈 return 
     
     def run(self, p):
         # Population 생성
-        pop = p.initializePop(self._popSize)
+        pop = p.initializePop(self._popSize)    # popsize만큼 초기화
         # Population 중 최적해 찾기
-        best = self.evalAndFindBest(pop, p)
-        numEval = p.getNumEval()
-        whenBestFound = numEval
+        best = self.evalAndFindBest(pop, p) # pop 내에서 최적해를 eval하고 best담음
+        numEval = p.getNumEval()    # 현재 numeval
+        whenBestFound = numEval # 최적해 발견한 numeval 기록 (best..)
         # limitEval 까지 [다음세대 생성–평가] 반복
         while numEval < self._limitEval:
             # print(f"Current Evaluations: {numEval}, Limit: {self._limitEval}")  # 디버깅
-            newPop = []
-            I = 0
+            newPop = [] # 새 population [] 생성 (자손?)
+            I = 0   
             # 다음 세대 생성; start
-            while I < self._popSize:
-                par1, par2 = self.selectParents(pop)
-                ch1, ch2 = p.crossover(par1, par2, self._pC)
-                newPop.extend([ch1, ch2])
-                I += 2
+            while I < self._popSize:    # popSize만큼 계속 돈다.
+                par1, par2 = self.selectParents(pop)    # 두 부모를 선택하고
+                ch1, ch2 = p.crossover(par1, par2, self._pC)    # crossover해준다.
+                newPop.extend([ch1, ch2])   # 생성된 자식을 newPop에 추가
+                I += 2  # 2명 늚
 
-            # 돌연변이 적용
-            newPop = [p.mutation(ind, self._pM) for ind in newPop]
-            pop = newPop
-            # 다음 세대 값 평가 및 best 업데이트
+            # 돌연변이 적용 (mutation)
+            newPop = [p.mutation(ind, self._pM) for ind in newPop]  # 자식 pop에서 각 객체에 pM확률로 mutation 시킨다. (돌연변이) 
+            pop = newPop    # 자식세대를 현재세대로 업데이트
+            # 다음 세대 값 평가 및 best 업데이트   
             newBest = self.evalAndFindBest(pop, p)
             numEval = p.getNumEval()  # 평가 횟수 업데이트
-            if newBest[0] < best[0]:
-                best = newBest
-                whenBestFound = numEval
+            if newBest[0] < best[0]:    # 최적해가 이전보다 좋으면 업데이트
+                best = newBest  #값
+                whenBestFound = numEval #numEval
 
-        self._whenBestFound = whenBestFound
-        bestSolution = p.indToSol(best)
-        p.storeResult(bestSolution, best[0])
+        self._whenBestFound = whenBestFound 
+        bestSolution = p.indToSol(best) # 최적해를 해석가능한 sol로 변환하기
+        p.storeResult(bestSolution, best[0])    # 값 저장
 
 
     def selectParents(self, pop):
-        ind1, ind2=self.selectTwo(pop)
-        par1 =self.binaryTournament(ind1, ind2)
-        ind1, ind2=self.selectTwo(pop)
-        par2 =self.binaryTournament(ind1, ind2)
-        return par1, par2
+        ind1, ind2=self.selectTwo(pop)  # pop중 개체 둘을 뽑고 더 우수한 개체를 부모로 삼는다.
+        par1 =self.binaryTournament(ind1, ind2) # 우수한 개체 뽑기
+        ind1, ind2=self.selectTwo(pop)  # pop중 개체 둘을 뽑고 더 우수한 개체를 부모로 삼는다.
+        par2 =self.binaryTournament(ind1, ind2) # 우수한 개체 뽑기
+        return par1, par2 #우수한 둘을 부모로 리턴 
 
     def selectTwo(self, pop):   ### TODO 
     # pop에서 random하게 2개의 individuals 선택해서 반환 (단순 비교문)
-        popCopy = pop[:]
-        random.shuffle(popCopy)
-        return popCopy[0],popCopy[1]    
+        popCopy = pop[:]    # pop copy
+        random.shuffle(popCopy) # 섞어
+        return popCopy[0],popCopy[1]   # 앞에 두개 뽑아 (그냥 암거나 두개 뽑는거임)  
 
     def binaryTournament(self, ind1, ind2): ### TODO 
     # 2개의 individuals 중 더 좋은 ind선택해서 반환 (랜덤)

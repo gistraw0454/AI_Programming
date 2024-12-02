@@ -155,6 +155,7 @@ class Numeric(Problem):
     def report(self):
         print("Average objective value: {0:,.3f}".format(self._avgMinimum))    # 평균 최소값 출력
         print("Average number of evalutions: {0:,}".format(int(self._avgNumEval)))  # 평균 최소 평가 횟수 출력
+        print("Average iteration of finding the best: {0:,}".format(self._avgWhen))
         print()
         print("Solution found:")
         print(self.coordinate())  # Convert list to tuple

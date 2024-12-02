@@ -52,6 +52,12 @@ class Problem(Setup):
         print()
         print("Total number of evaluations: {0:,}".format(self._sumOfNumEval))
 
+    def avgReport(self):
+        if 1<= self._aType <=4:
+            print("Average number of evaluations: {0:,}".format(round(self._avgNumEval)))
+        if 5<= self._aType <=6:
+            print("Average iteration of finding the best: {0:,}".format(self._avgWhen))
+
     def getSolution(self):
         return self._solution
     
@@ -61,8 +67,7 @@ class Problem(Setup):
     def getNumEval(self):
         return self._numEval
     
-    def indToSol(self, ind):    # 복붙하기..? 여기 위치가 맞나 싶다.
-        return self.decode(ind[1])
+    
 
 
 class Numeric(Problem): ###TODO 실습 : 여기에 InitializePop 구현하기
@@ -159,8 +164,9 @@ class Numeric(Problem): ###TODO 실습 : 여기에 InitializePop 구현하기
             print(" "+varNames[i]+":",(low[i],up[i]))
 
     def report(self):
+
         print("Average objective value: {0:,.3f}".format(self._avgMinimum))    # 평균 최소값 출력
-        print("Average number of evalutions: {0:,}".format(int(self._avgNumEval)))  # 평균 최소 평가 횟수 출력
+        Problem.avgReport(self)
         print()
         print("Solution found:")
         print(self.coordinate())  # Convert list to tuple
@@ -209,10 +215,10 @@ class Numeric(Problem): ###TODO 실습 : 여기에 InitializePop 구현하기
     
 
     def initializePop(self, size): 
-        pop=[]
-        for i in range(size):
-            chromosome=self.randBinStr()
-            pop.append([0, chromosome])
+        pop=[]  # 빈 pop (현)
+        for i in range(size):   # 파라미터 size만큼 돌면서
+            chromosome=self.randBinStr()    # 랜덤한 bin 문자열 만들기
+            pop.append([0, chromosome]) # 평가값, 염색체들 뽑기
         return pop
     
     def randBinStr(self):
@@ -258,7 +264,7 @@ class Numeric(Problem): ###TODO 실습 : 여기에 InitializePop 구현하기
     
 
     def crossover(self, ind1, ind2, uXp):  
-        chr1, chr2=self.uXover(ind1[1], ind2[1], uXp)
+        chr1, chr2=self.uXover(ind1[1], ind2[1], uXp)   #uXp로 crossover시키기
         return[0, chr1], [0, chr2]
 
     def uXover(self, chrInd1, chrInd2, uXp): # uniform crossover
@@ -275,11 +281,14 @@ class Numeric(Problem): ###TODO 실습 : 여기에 InitializePop 구현하기
         # mrF * (1/ lnegth of individual) 확률로 ind의 개별 원소 bit-flip
         child = ind[:] # Make copy
         # implement ### TODO
-        n = len(ind[1])
-        for i in range(len(child)):
-            if random.uniform(0,1) <mrF * (1/n):
+        n = len(ind[1]) # 염색체 길이를 가져와
+        for i in range(len(child)): # child만큼 돌리면서
+            if random.uniform(0,1) <mrF * (1/n): # 계산
                 child[1][i]= 1-child[1][i]
         return child
+    
+    def indToSol(self, ind):    # 복붙하기..? 여기 위치가 맞나 싶다.
+        return self.decode(ind[1])  # decode해주기
 
 class Tsp(Problem):
     def __init__(self):
@@ -389,27 +398,66 @@ class Tsp(Problem):
 
     def report(self):
         print("Average tour cost: {0:,}".format(round(self._avgMinimum)))  # 평균 여행 비용 출력
-        print("Average number of evalutions: {0:,}".format(int(self._avgNumEval)))  # 평균 평가횟수 출력
+        Problem.avgReport(self)
         print()
         print("Best order of visits:")
         self.tenPerRow()
         print("Best tour cost: {0:,}".format(round(self._bestMinimum)))   
         super().report()
 
-    def initializePop(self,size):
-        n = self._numCities
-        pop = []
-        for i in range(size):
-            chromosome = self.randomInit()
-            pop.append([0,chromosome])
+    def initializePop(self,size):   ### TODO 초기 자식 생성
+        pop = []    
+        for i in range(size):   # 파라미터 size만큼 돌면서 
+            chromosome = self.randomInit()   # tsp.randomInit메서드 이용하여 chromosome 생성하고 pop에 추가
+            pop.append([0,chromosome])     # 초기 평가값은 0으로하고 나머지는 랜덤으로 하여 pop에 추가
         return pop
     
-    def evalInd(self, ind): 
-        ind[0] = self.evaluate(self.decode(ind[1]))
+    def evalInd(self, ind):     # 한 개체의[1] 평가값을 계산하여 ind[0]에 저장한다.
+        ind[0] = self.evaluate(ind[1])
 
-    def crossover(self, ind1, ind2, XR): 
-        if random.uniform(0, 1) <= XR:
+    def crossover(self, ind1, ind2, XR):   #chromosome = [eval_value, [tour order]] = [0, [5, 12, 17, 11, 7, 22, …]]
+        if random.uniform(0, 1) <= XR:  # 교차확률 XR에 따라서 oXover 교차를 한다.
             chr1, chr2 = self.oXover(ind1[1], ind2[1])
         else:
-            chr1, chr2 = ind1[1][:], ind2[1][:] 
+            chr1, chr2 = ind1[1][:], ind2[1][:] # 그대로 
         return [0, chr1], [0, chr2]
+
+    def oXover(self, chr1, chr2):   ### TODO : ppt 참고 구현하기 ! 찐 교차
+        # 1. Ind 길이 사이의 두 값 a, b 생성 (a < b)
+        a, b = sorted(random.sample(range(len(chr1)  ), 2))  # [a,b]중 하나를 골라 무작위로 추출
+        
+        # 2. chr1과 chr2의 a~b 구간 대응하는 원소 찾기
+        a_b_chr1 = chr1[a:b + 1]    
+        a_b_chr2 = chr2[a:b + 1]
+        
+        # 3. 사이 값과 같은 값을 상대 individual에서 삭제
+        rmv_chr1 = []  # 빈 리스트를 생성
+        for gene in chr2:  # chr2 리스트의 각 요소(유전자)에 대해 반복
+            if gene not in a_b_chr1:  # 만약 그 유전자가 a_b_chr1에 없다면
+                rmv_chr1.append(gene)  # 그 유전자를 rmv_chr1 리스트에 추가
+        rmv_chr2 = []  # 빈 리스트를 생성
+        for gene in chr1:  # chr1 리스트의 각 요소(유전자)에 대해 반복
+            if gene not in a_b_chr2:  # 만약 그 유전자가 a_b_chr2에 없다면
+                rmv_chr2.append(gene)  # 그 유전자를 rmv_chr2 리스트에 추가
+        
+        # 4. 왼쪽에서부터 남은 값을 shift하며 비워진 구간 채우기
+        new_chr1 = rmv_chr1[:a] + a_b_chr1 + rmv_chr1[a:]
+        new_chr2 = rmv_chr2[:a] + a_b_chr2 + rmv_chr2[a:]
+        
+        return new_chr1, new_chr2
+
+    def mutation(self, ind, mR):    # TODO : 주석 참고 구현하기 !
+        # mR 확률로 mutation 수행
+        if random.uniform(0, 1) <= mR:  # mR 변이확률에 따라 변이시키기
+            chromosome = ind[1] # ind[1]염색체를 가져와서 길이를 가져와
+            length = len(chromosome)
+            # 1. 두 값 i, j (i < j) 생성
+            i, j = sorted(random.sample(range(length), 2))  # 해당길이부터 2까지 무작위로 i,j를 뽑고 
+            
+            # 2. i~j 구간 inversion 수행 반전 시킨다.
+            chromosome[i:j + 1] = reversed(chromosome[i:j + 1])
+        
+        return ind
+
+    def indToSol(self, ind):
+        return ind[1]

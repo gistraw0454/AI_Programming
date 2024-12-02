@@ -42,6 +42,7 @@ def readPlan(): # 파일명을 읽어와서 pType, pFileName,, 이런것들 알�
         else:
             parameters[parNames[i]] = eval(line.rstrip().split(':')[-1][1:])
     infile.close()
+    print(parameters)
     return parameters             # Return a dictionary of parameters
 
 def lineAfterComments(infile):    # Ignore lines beginning with '#'

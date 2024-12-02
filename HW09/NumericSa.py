@@ -17,10 +17,10 @@ def readPlanAndCreate():
 
 def readValidPlan():  # Gradient Descent cannot solve TSP
     while True:
-        parameters = { 'pType':1, 'pFileName':'problem/Ackley.txt', 'aType':6, 'delta':0.01,
-                   'limitStuck':1000, 'alpha':0.01, 'dx':0.0001, 'numRestart':10,
+        parameters = { 'pType':1, 'pFileName':'problem/Convex.txt', 'aType':5, 'delta':0.01,
+                   'limitStuck':50000, 'alpha':0.01, 'dx':0.0001, 'numRestart':10,
                    'limitEval':100, 'popSize':10, 'resolution':10,'uXp':0.2,
-                   'mrF':1,'XR':0.5,'mR':0.9, 'numExp':2 }
+                   'mrF':1,'XR':0.1,'mR':0.9, 'numExp':2 }
         if parameters['pType'] == 2 and parameters['aType'] == 4:   # 예외처리
             print("You cannot choose Gradient Descent")
             print("       unless your want a numerical optimization.")
@@ -54,10 +54,7 @@ def createOptimizer(parameters): ### TODO (정답 !)
 
 def conductExperiment(p, alg):
     aType = alg.getAType()
-    if 1 <= aType <= 4:
-        alg.randomRestart(p)
-    else:
-        alg.run(p)
+    alg.run(p)
     bestSolution = p.getSolution()
     bestMinimum = p.getValue()    # First result is current best
     numEval = p.getNumEval()
@@ -68,10 +65,7 @@ def conductExperiment(p, alg):
         sumOfWhen = alg.getWhenBestFound()
     numExp = alg.getNumExp()
     for i in range(1, numExp):
-        if 1 <= aType <= 4:
-            alg.randomRestart(p)
-        else:
-            alg.run(p)
+        alg.run(p)
         newSolution = p.getSolution()
         newMinimum = p.getValue()  # New result
         numEval = p.getNumEval()
@@ -177,9 +171,8 @@ class Problem(Setup):
     
     
 
+############## Numeric #################
 
-
-################## Numeric ##################
 class Numeric(Problem): ###TODO 실습 : 여기에 InitializePop 구현하기
     def __init__(self):
         Problem.__init__(self)
@@ -399,8 +392,8 @@ class Numeric(Problem): ###TODO 실습 : 여기에 InitializePop 구현하기
     
     def indToSol(self, ind):    # 복붙하기..? 여기 위치가 맞나 싶다.
         return self.decode(ind[1])
-
-
+    
+    
 ################# Optimizer ###################
 class Optimizer(Setup): # Optimizer class interface
 
@@ -414,7 +407,6 @@ class Optimizer(Setup): # Optimizer class interface
         Setup.setVariables(self, parameters)
         self._pType = parameters['pType']
         self._numExp = parameters['numExp']
-        
 
     def getNumExp(self):
         return self._numExp
@@ -447,117 +439,118 @@ class MetaHeuristic(Optimizer): # Optimizer를 상속받는 MetaHeuristic class 
 
 
 
-############### GA #######################
-
-class GA(MetaHeuristic):
+###################### SimulatedAnnealing ################33
+class SimulatedAnnealing(MetaHeuristic):
     def __init__(self):
-        MetaHeuristic.__init__(self)
-        self._popSize = 0     # Population size
-        self._uXp = 0   # Probability of swappping a locus for Xover
-        self._mrF = 0   # Multiplication factor to 1/n for bit-flip mutation
-        self._XR = 0    # Crossover rate for permutation code
-        self._mR = 0    # Mutation rate for permutation code
-        self._pC = 0    # Probability parameter for Xover
-        self._pM = 0    # Probability parameter for mutation
-
-    def setVariables(self, parameters):
-        MetaHeuristic.setVariables(self, parameters)
-        self._popSize = parameters['popSize']
-        self._uXp = parameters['uXp']
-        self._mrF = parameters['mrF']
-        self._XR = parameters['XR']
-        self._mR = parameters['mR']
-        if self._pType == 1:
-            self._pC = self._uXp
-            self._pM = self._mrF
-        if self._pType == 2:
-            self._pC = self._XR
-            self._pM = self._mR
+        MetaHeuristic.__init__(self) 
+        self._numSample=100
 
     def displaySetting(self):
-        print()
-        print("Search Algorithm: Genetic Algorithm")
-        print()
+        print("Search Algorithm: Simulated Annealing")
         MetaHeuristic.displaySetting(self)
-        print()
-        print("Population size:", self._popSize)
-        if self._pType == 1:   # Numerical optimization
-            # print("Number of bits for binary encoding:", self._resolution)
-            print("Swap probability for uniform crossover:", self._uXp)
-            print("Multiplication factor to 1/L for bit-flip mutation:",
-                  self._mrF)
-        elif self._pType == 2: # TSP
-            print("Crossover rate:", self._XR)
-            print("Mutation rate:", self._mR)
         
-        print()
-        
-
-
-    def evalAndFindBest(self, pop, p):
-        best = pop[0]
-        p.evalInd(best)
-        bestValue = best[0]
-        for i in range(1, len(pop)):
-            p.evalInd(pop[i])
-            newValue = pop[i][0]
-            if newValue < bestValue:
-                best = pop[i]
-                bestValue = newValue
-        return best
     
     def run(self, p):
-        # Population 생성
-        pop = p.initializePop(self._popSize)
-        # Population 중 최적해 찾기
-        best = self.evalAndFindBest(pop, p)
-        numEval = p.getNumEval()
-        whenBestFound = numEval
-        # limitEval 까지 [다음세대 생성–평가] 반복
-        while numEval < self._limitEval:
-            # print(f"Current Evaluations: {numEval}, Limit: {self._limitEval}")  # 디버깅
-            newPop = []
-            I = 0
-            # 다음 세대 생성; start
-            while I < self._popSize:
-                par1, par2 = self.selectParents(pop)
-                ch1, ch2 = p.crossover(par1, par2, self._pC)
-                newPop.extend([ch1, ch2])
-                I += 2
+        current = p.randomInit()
+        valueC = p.evaluate(current)
+        f= open('anneal.txt','w')
+        best, valueBest = current, valueC
+        whenBestFound = 1
+        i = 1
+        t = self.initTemp(p) 
+        evaluations = 0
 
-            # 돌연변이 적용
-            newPop = [p.mutation(ind, self._pM) for ind in newPop]
-            pop = newPop
-            # 다음 세대 값 평가 및 best 업데이트
-            newBest = self.evalAndFindBest(pop, p)
-            numEval = p.getNumEval()  # 평가 횟수 업데이트
-            if newBest[0] < best[0]:
-                best = newBest
-                whenBestFound = numEval
+        while True:
+            # 1. tSchedule을 통해 t update
+            t = self.tSchedule(t)   # 온도 감소
+            if t==0 or i == self._limitEval:
+                break
 
+            # 2. 현재 상태에 대한 randomMutant 생성
+            neighbor = p.randomMutant(current)
+            valueN = p.evaluate(neighbor)
+            i+=1
+            dE = valueN - valueC
+            
+            if dE < 0:
+                current = neighbor
+                valueC = valueN
+            elif random.uniform(0,1)< math.exp(-dE/t):
+                current = neighbor
+                valueC = valueN
+
+            f.write(str(valueC)+'\n')
+
+            if valueC < valueBest:
+                best, valueBest = current, valueC
+                whenBestFound = i
+    
         self._whenBestFound = whenBestFound
-        bestSolution = p.indToSol(best)
-        p.storeResult(bestSolution, best[0])
+        p.storeResult(best, valueBest)
+        f.close()
+    
+    def stochasticBest(self, neighbors, p):
+        # Smaller valuse are better in the following list
+        valuesForMin = [p.evaluate(indiv) for indiv in neighbors]
+        largeValue = max(valuesForMin) + 1
+        valuesForMax = [largeValue - val for val in valuesForMin]
+        # Now, larger values are better
+        total = sum(valuesForMax)
+        randValue = random.uniform(0, total)
+        s = valuesForMax[0]
+        for i in range(len(valuesForMax)):
+            if randValue <= s: # The one with index i is chosen
+                break
+            else:
+                s += valuesForMax[i+1]
+        return neighbors[i], valuesForMin[i]
 
+    def initTemp(self, p): # To set initial acceptance probability to 0.5
+        diffs = []
+        for i in range(self._numSample):
+            c0 = p.randomInit()     # A random point
+            v0 = p.evaluate(c0)     # Its value
+            c1 = p.randomMutant(c0) # A mutant
+            v1 = p.evaluate(c1)     # Its value
+            diffs.append(abs(v1 - v0))
+        dE = sum(diffs) / self._numSample  # Average value difference
+        t = dE / math.log(2)        # exp(–dE/t) = 0.5
+        return t
 
-    def selectParents(self, pop):
-        ind1, ind2=self.selectTwo(pop)
-        par1 =self.binaryTournament(ind1, ind2)
-        ind1, ind2=self.selectTwo(pop)
-        par2 =self.binaryTournament(ind1, ind2)
-        return par1, par2
+    def tSchedule(self, t):
+        return t * (1 - (1 / 10**4))
 
-    def selectTwo(self, pop):   ### TODO 
-    # pop에서 random하게 2개의 individuals 선택해서 반환 (단순 비교문)
-        popCopy = pop[:]
-        random.shuffle(popCopy)
-        return popCopy[0],popCopy[1]    
+    
+    def stochasticBest(self, neighbors, p):
+        # Smaller valuse are better in the following list
+        valuesForMin = [p.evaluate(indiv) for indiv in neighbors]
+        largeValue = max(valuesForMin) + 1
+        valuesForMax = [largeValue - val for val in valuesForMin]
+        # Now, larger values are better
+        total = sum(valuesForMax)
+        randValue = random.uniform(0, total)
+        s = valuesForMax[0]
+        for i in range(len(valuesForMax)):
+            if randValue <= s: # The one with index i is chosen
+                break
+            else:
+                s += valuesForMax[i+1]
+        return neighbors[i], valuesForMin[i]
 
-    def binaryTournament(self, ind1, ind2): ### TODO 
-    # 2개의 individuals 중 더 좋은 ind선택해서 반환 (랜덤)
-        if ind1[0] < ind2[0] : return ind1 #ind1[0]에 값이 들어있을거기때문..
-        else : return ind2
+    def initTemp(self, p): # To set initial acceptance probability to 0.5
+        diffs = []
+        for i in range(self._numSample):
+            c0 = p.randomInit()     # A random point
+            v0 = p.evaluate(c0)     # Its value
+            c1 = p.randomMutant(c0) # A mutant
+            v1 = p.evaluate(c1)     # Its value
+            diffs.append(abs(v1 - v0))
+        dE = sum(diffs) / self._numSample  # Average value difference
+        t = dE / math.log(2)        # exp(–dE/t) = 0.5
+        return t
 
+    def tSchedule(self, t):
+        return t * (1 - (1 / 10**4))
     
 
 main()

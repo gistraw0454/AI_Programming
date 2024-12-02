@@ -19,7 +19,7 @@
 #    4. Gradient Descent
 #  Metaheuristic algorithms:
 #    5. Simulated Annealing
-   Enter the number (aType ) : 3
+   Enter the number (aType ) : 5
 #
 # If you are solving a function optimization problem,
 #   what should be the step size for axis-parallel mutation?
@@ -44,4 +44,4 @@
   Enter the number (limitEval) : 100000
 #
 # Enter the total number of experiments
-   Enter the number (numExp) : 1
+   Enter the number (numExp) : 2

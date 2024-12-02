@@ -249,7 +249,7 @@ class SimulatedAnnealing(MetaHeuristic):
             neighbor = p.randomMutant(current)
             valueN = p.evaluate(neighbor)
             i+=1
-            dE = valueN = valueC
+            dE = valueN - valueC
             
             if dE < 0:
                 current = neighbor
