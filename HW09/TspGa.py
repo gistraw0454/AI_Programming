@@ -18,10 +18,10 @@ def readPlanAndCreate():
 
 def readValidPlan():  # Gradient Descent cannot solve TSP
     while True:
-        parameters = { 'pType':2, 'pFileName':'problem/Tsp100.txt', 'aType':6, 'delta':0.01,
+        parameters = { 'pType':2, 'pFileName':'HW09/problem/Tsp100.txt', 'aType':6, 'delta':0.01,
                    'limitStuck':50000, 'alpha':0.01, 'dx':0.0001, 'numRestart':10,
-                   'limitEval':100, 'popSize':10, 'resolution':10,'uXp':0.2,
-                   'mrF':1,'XR':0.1,'mR':0.9, 'numExp':2 }
+                   'limitEval':50000, 'popSize':10, 'resolution':10,'uXp':0.2,
+                   'mrF':1,'XR':0.1,'mR':0.9, 'numExp':10 }
         if parameters['pType'] == 2 and parameters['aType'] == 4:   # 예외처리
             print("You cannot choose Gradient Descent")
             print("       unless your want a numerical optimization.")
