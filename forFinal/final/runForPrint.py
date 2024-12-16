@@ -45,10 +45,6 @@ class Numeric(Problem):
                 break
         return flag
 
-
-
-
-
 ## TSP(Problem)
 class Tsp(Problem):
     ...
