@@ -1,23 +1,6 @@
 import random
 import math
-
-class Setup:
-    def __init__(self):
-        self._pType = 0
-        self._aType = 0
-        self._delta = 0
-        self._alpha = 0
-        self._dx = 0
-
-    def setVariables(self, parameters):
-        self._pType = parameters['pType']
-        self._aType = parameters['aType']
-        self._delta = parameters['delta']
-        self._alpha = parameters['alpha']
-        self._dx = parameters['dx']
-        
-    def getAType(self):
-        return self._aType
+from setup import Setup
 
 class Optimizer(Setup):
     def __init__(self):
@@ -110,9 +93,17 @@ class SimulatedAnnealing(MetaHeuristic):
         p.storeResult(best,valueBest)
         # f.close()
 
-    def initTemp(self,p):   # 온도를 초기화한다.
+    def initTemp(self, p): # To set initial acceptance probability to 0.5
         diffs = []
-        
+        for i in range(self._numSample):
+            c0 = p.randomInit()     # A random point
+            v0 = p.evaluate(c0)     # Its value
+            c1 = p.randomMutant(c0) # A mutant
+            v1 = p.evaluate(c1)     # Its value
+            diffs.append(abs(v1 - v0))
+        dE = sum(diffs) / self._numSample  # Average value difference
+        t = dE / math.log(2)        # exp(–dE/t) = 0.5
+        return t
     
     def tSchedule(t):
         return t * (1-(1/10**4))    # t*(9999/10000)
