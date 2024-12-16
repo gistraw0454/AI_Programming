@@ -240,7 +240,6 @@ class SimulatedAnnealing(MetaHeuristic):
         whenBestFound = 1
         i = 1
         t = self.initTemp(p) 
-        evaluations = 0
 
         while True:
             # 1. tSchedule을 통해 t update
