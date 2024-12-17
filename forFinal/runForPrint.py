@@ -18,7 +18,7 @@ class Numeric(Problem):
         grad = self.gradient(x,valueC)    # 현재 위치에서 기울기 계산
         xCopy = x[:]
         for i in range(len(xCopy)):
-            xCopy -= self._alpha*grad[i]
+            xCopy -= self._alpha*grad[i]    # 기울기 반대방향으로 이동, 즉 감소하는방향으로 움직인다.
         
         if self.isLegal(xCopy): # 전부 범위내에 있으면, xCopy 리턴
             return xCopy
@@ -116,8 +116,8 @@ def run(self,p):
     valueC = p.evaluate(current)
     while True:
         neighbors = p.mutants(current)  # 이웃들 소환
-        successor, valueS = self.bestOf(neighbors,p)   
-        if valueS >= valueC:
+        successor, valueS = self.bestOf(neighbors,p)
+        if valueS >= valueC:   
             break
         else:
             current = successor

@@ -1,3 +1,34 @@
+def takeStep(self,x,valueC):
+        grad = self.gradient(x,valueC) 
+        xCopy = x[:]
+        for i in range(len(xCopy)):
+            xCopy -= self._alpha*grad[i]  
+        
+        if self.isLegal(xCopy):
+            return xCopy
+        else:
+            return x   
+    
+def gradient(self, x, v):
+    grad=[]
+    for i in range(len(x)):
+        xCopyH = x[:]
+        xCopyH[i] += self._dx
+        g = (self.evaluate(xCopyH)-v)/self._dx
+        grad.append(g)
+    return grad
+
+def isLegal(self,x):
+    domain = self._domain
+    low = domain[1]
+    up = domain[2]
+    flag = True
+    for i in range(len(low)):
+        if x[i] <low[i] or x[i]>up[i]:
+            flag = False
+            break
+    return flag
+
 ## FirstChoice(HillClimbing)
 def run(self, p):
     current = p.randomInit()

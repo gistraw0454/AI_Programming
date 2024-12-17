@@ -101,34 +101,30 @@ class Stochastic(HillClimbing): # HillClimbing 상속받는 Stochastic class
         HillClimbing.displaySetting(self)   # super class의 해당 메서드 호출
 
     def run(self, p):   # 실행 메서드
-        current = p.randomInit()  
-        valueC = p.evaluate(current)
-        f = open('stochastic.txt','w')  # stochastic.txt 파일 열기
+        current = p.randomInit()  # 현위치 랜덤 뽑기
+        valueC = p.evaluate(current)    # 현위치 평가
+        # f = open('stochastic.txt','w')  # stochastic.txt 파일 열기
         i = 0
-
-        while i < self._limitStuck:
-            neighbors = p.mutants(current)
-            temp, valueS = self.stochasticBest(neighbors, p)    # 호출하는 함수가 Steepest와 다름 (나머지는 유사)
-            f.write(str(valueC)+'\n')   # 파일에 한줄 씩 작성 ( 매 iteration 마다 결과를 저장 )
-
-            if valueS < valueC:
-                current = temp
+        while i < self._limitStuck: # 정해진만큼 도는데
+            neighbors = p.mutants(current)  # 이웃하나를 생성해
+            temp, valueS = self.stochasticBest(neighbors, p)    # 호출하는 함수가 Steepest와 다름 (나머지는 유사)   이웃들중에서 best를 호출해
+            # f.write(str(valueC)+'\n')   # 파일에 한줄 씩 작성 ( 매 iteration 마다 결과를 저장 )
+            if valueS < valueC: # 그 best값이 현재값보다 더 나은결과면
+                current = temp  # 변경해
                 valueC = valueS
-                i = 0 
-
+                i = 0  # 다시 새로 돌아
             else:
-                i += 1
-
+                i += 1  # interator 증가시키기
         p.storeResult(current, valueC)
-        f.close()   # f 닫기
+        # f.close()   # f 닫기
 
     def stochasticBest(self, neighbors, p): # 예제 코드 가져옴
-        valuesMin = [p.evaluate(indiv) for indiv in neighbors]
-        large = max(valuesMin) + 1
-        valuesMax = [large - val for val in valuesMin]
+        valuesMin = [p.evaluate(indiv) for indiv in neighbors]  # 이웃의 eval들을 모은 list 만들기
+        large = max(valuesMin) + 1  # max값+1 0피하기
+        valuesMax = [large - val for val in valuesMin]  # large- 값들을해서 숫자가 작은게 더 좋게 만들어준다.
 
-        total = sum(valuesMax)
-        randValue = random.uniform(0, total)
+        total = sum(valuesMax)  # total을 구함
+        randValue = random.uniform(0, total)    # 0부터 total 값까지 임의의 값을 하나 뽑고
         s = valuesMax[0]
 
         for i in range(len(valuesMax)):
@@ -248,14 +244,16 @@ class SimulatedAnnealing(MetaHeuristic):
                 break
 
             # 2. 현재 상태에 대한 randomMutant 생성
-            neighbor = p.randomMutant(current)
-            valueN = p.evaluate(neighbor)
+            neighbor = p.randomMutant(current)  # 이웃하나 뽑기
+            valueN = p.evaluate(neighbor)   
             i+=1
             dE = valueN - valueC
             
-            if dE < 0:
+            if dE < 0:  # 평가결과가 좋으면 이동
                 current = neighbor
                 valueC = valueN
+            
+            # bad move다? 그러면 random.uniform(0,1) < math.exp(-dE/t)
             elif random.uniform(0,1)< math.exp(-dE/t):
                 current = neighbor
                 valueC = valueN
